@@ -26,7 +26,7 @@ const els = {
 
 // Initialize
 function init() {
-  console.log("App init, token:", token);
+  // console.log("App init, token:", token);
   if (!token || token === "undefined") {
     console.log("No valid token found, redirecting to login");
     window.location.href = "login.html";
@@ -62,6 +62,9 @@ function initSocket() {
 
   socket.on("connect", () => {
     console.log("✅ Connected to WebSocket");
+    if (els.connectionText.textContent === "Disconnected") {
+      fetchOrders();
+    }
     els.socketStatus.classList.remove("bg-red-500");
     els.socketStatus.classList.add("bg-green-500");
     els.connectionText.textContent = "Live";
@@ -106,9 +109,9 @@ async function fetchOrders() {
     });
     const data = await res.json();
     if (data.success) {
-      // Sort by newest first
+      // Sort by oldest first
       orders = data.data.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
       );
       renderOrders();
     } else if (res.status === 401) {
@@ -232,8 +235,8 @@ function createOrderCard(order) {
     <div class="flex justify-between items-start mb-4">
       <div>
         <div class="flex items-center gap-2 mb-1">
-          <span class="font-black text-xl text-slate-900">#${
-            order.orderNumber
+          <span class="font-black text-xl text-slate-900">₹ ${
+            order.totalAmount
           }</span>
           <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide border border-blue-100">${order.type.replace(
             "_",
